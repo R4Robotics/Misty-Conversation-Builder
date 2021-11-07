@@ -707,15 +707,23 @@ namespace ConversationBuilder.Controllers
 			{
 				System.Security.Claims.ClaimsPrincipal currentUser = User;
 				ApplicationUser applicationUser = await _userManager.GetUserAsync(User);
-				_userInformation = new UserInformation();
 
-				_userInformation.AccessId = applicationUser.Id;
-				if (User.IsInRole(Roles.SiteAdministrator))
+				// View expects null userinfo obj 
+				if (applicationUser != null)
 				{
-					_userInformation.IsSiteAdmin = true;
-				}
+					_userInformation = new UserInformation();
 
-				return _userInformation;
+					_userInformation.AccessId = applicationUser.Id;
+					if (User.IsInRole(Roles.SiteAdministrator))
+					{
+						_userInformation.IsSiteAdmin = true;
+					}
+
+					return _userInformation;
+				}
+				else
+					// CK 211107 - catch unauthenticated users and prompt for login
+					return null;
 			}
 			catch
 			{
